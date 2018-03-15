@@ -3,6 +3,11 @@ A Test-Implementation of the IMPALA algorithm (by deepmind 2018)
 
 ![Grid World Barto/Sutton new 2017 draft Chapter 13.1](https://github.com/ducandu/RL-Implementation-IMPALA/blob/master/grid_world.png "The grid world we are trying to solve")
 
+*The grid world we are trying to solve: S=start state, G=goal state; every move gives a reward of -1, except when reaching the goal state, which yields +1.
+Actions are deterministic 'left' and 'right'. The second state (the one right of the start state) behaves strangely: Moving right from here
+brings you back to S, moving left from here actually moves you to the right. The optimal policy is a stochastic one, which is why this task
+cannot be solved by pure value-function based methods (like Q-learning).*
+
 **IMPORTANT NOTE: Currently, IMPALA's "V-trace"-correction is not
 implemented! Instead, we are using simple REINFORCE with a state-value
 function baseline by Williams (1992).**

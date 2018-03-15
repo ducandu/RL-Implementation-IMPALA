@@ -45,8 +45,9 @@ def main():
     parser.add_argument("-m", "--max-steps-per-episode", type=int, default=100,
                         help="Max. steps an explorer should make in one episode.")
     parser.add_argument("-b", "--buffer-size", type=int, default=1000,
-                        help="Number of time steps to store at any time for each explorer.")
-    parser.add_argument("--learn-batch-size", type=int, default=64,
+                        help="Number of time steps to store (round robin) in the local buffers of each explorer. "
+                             "The size of the global buffer will be this number times the number of explorers.")
+    parser.add_argument("--learn-batch-size", type=int, default=32,
                         help="Size of a batch (number of episodes) to pull randomly from the main buffer "
                              "for each learner iteration.")
     parser.add_argument("-f", "--upload-frequency", type=int, default=4,
@@ -206,6 +207,7 @@ def main():
                         num_episodes += 1
                         fetches = sync_ops
                         if num_episodes % args.upload_frequency == 0:
+                            print("num_episodes={}: uploading local buffer to global buffer".format(num_episodes))
                             fetches.append(experience_upload)
                         fetches = mon_sess.run(fetches)
         print("Explorer {} is done!".format(args.task_index))
@@ -223,19 +225,17 @@ def main():
         # get a random batch from the main buffer
         indexes = tf.random_shuffle(tf.range(size_main_experience_buffer))
         sample = tf.gather(main_experience_buffer, indexes[:args.learn_batch_size])
-        # separate discounted accum. reward and action (0=left, 1=right)
+        # separate action (0=left, 1=right) and discounted accum. reward
         actions, returns = tf.split(sample, num_or_size_splits=len_buffer_record, axis=1)
         # probability of the action actually taken
         action_prob = tf.abs(tf.subtract(actions, tf.ones(tf.shape(actions))) + action_right_prob)
         log_action_prob = tf.log(action_prob)
+        advantage = (returns - values)
 
         # define our loss function
         alpha_1 = 0.5  # log-action-prob loss
         alpha_2 = 0.4  # value function loss
         alpha_3 = 0.1  # regularization
-
-        # reduce-mean on batch and timestep axes
-        advantage = (returns - values)
         loss = - alpha_1 * tf.reduce_mean(tf.multiply(log_action_prob, advantage)) + \
                alpha_2 * tf.reduce_mean(0.5 * tf.square(advantage)) + \
                alpha_3 * 0  # TODO: add regularization
