@@ -1,7 +1,7 @@
 # RL-implement-IMPALA
 A Test-Implementation of the IMPALA algorithm (by deepmind 2018)
 
-![Grid World Barto/Sutton new 2017 draft Chapter 13.1](https://raw.githubusercontent.com/ducandu/RL-Implementation-IMPALA/master/grid_world.png "The grid world we are trying to solve")
+![Grid World Barto/Sutton new 2017 draft Chapter 13.1](https://github.com/ducandu/RL-Implementation-IMPALA/blob/master/grid_world.png "The grid world we are trying to solve")
 
 **IMPORTANT NOTE: Currently, IMPALA's "V-trace"-correction is not
 implemented! Instead, we are using simple REINFORCE with a state-value

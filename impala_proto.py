@@ -38,7 +38,7 @@ def main():
                         help="Comma-separated list of hostname:port pairs")
     parser.add_argument("-e", "--explorer-hosts", type=str, required=True,
                         help="Comma-separated list of hostname:port pairs")
-    parser.add_argument("-j", "--job-name", type=str, default="worker", help="One of 'learner', 'explorer'")
+    parser.add_argument("-j", "--job-name", type=str, default="learner", help="One of 'learner', 'explorer'")
     parser.add_argument("-t", "--task-index", type=int, default=0, help="Index of task within the job")
     parser.add_argument("-s", "--steps-per-explorer", type=int, default=1000000,
                         help="Max. steps an explorer should make in its env (in total before stopping).")
