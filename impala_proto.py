@@ -47,7 +47,7 @@ def main():
     parser.add_argument("-b", "--buffer-size", type=int, default=1000,
                         help="Number of time steps to store (round robin) in the local buffers of each explorer. "
                              "The size of the global buffer will be this number times the number of explorers.")
-    parser.add_argument("--learn-batch-size", type=int, default=32,
+    parser.add_argument("--learn-batch-size", type=int, default=16,
                         help="Size of a batch (number of episodes) to pull randomly from the main buffer "
                              "for each learner iteration.")
     parser.add_argument("-f", "--upload-frequency", type=int, default=4,
@@ -57,7 +57,7 @@ def main():
                         help="Number of hidden nodes.")
     parser.add_argument("-g", "--gamma", type=float, default=0.97,
                         help="The discount factor gamma (default 0.9).")
-    parser.add_argument("-a", "--learning-rate", type=float, default=0.001,
+    parser.add_argument("-a", "--learning-rate", type=float, default=0.0005,
                         help="The learning rate (alpha) to use for optimizing the cost.")
     args = parser.parse_args()
     learner_hosts = args.learner_hosts.split(",")
@@ -82,9 +82,9 @@ def main():
                                                   ps_device="/job:learner",
                                                   worker_device="/job:explorer/task:0")
                    ):
-        weights_1_pi = tf.Variable(tf.truncated_normal(shape=(num_inputs, num_hidden)), name="pi-W1")
+        weights_1_pi = tf.Variable(tf.truncated_normal(shape=(num_inputs, num_hidden), stddev=0.01), name="pi-W1")
         biases_1_pi = tf.Variable(tf.zeros(shape=(num_hidden,)), name="pi-b1")
-        weights_2_pi = tf.Variable(tf.truncated_normal(shape=(num_hidden, num_out)), name="pi-W2")
+        weights_2_pi = tf.Variable(tf.truncated_normal(shape=(num_hidden, num_out), stddev=0.01), name="pi-W2")
         biases_2_pi = tf.Variable(tf.zeros(shape=(num_out,)), name="pi-b2")
 
     # main experience buffer (on central learner)
