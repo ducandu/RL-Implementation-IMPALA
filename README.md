@@ -40,7 +40,9 @@ $ python impala_proto.py -h
 
 to see possible command line options.
 
-To run a most basic actual RL-job, start the following two scripts in parallel:
+To run a most basic actual RL-job, start the following two scripts in parallel
+(remember that this most likely will not work locally if you use tensorflow-gpu,
+as tensorflow does not like sharing the GPU with another (tensorflow) process):
 
 ```
 $ python impala_proto.py -l localhost:22222 -e localhost:22223 -j learner -t 0
@@ -49,7 +51,7 @@ $ python impala_proto.py -l localhost:22222 -e localhost:22223 -j explorer -t 0
 
 This will run the algo on the local machine using one learner and one explorer (agent).
 Add more learners or explorers if you like.
-The built-in Env is the one taken from *Barto & Sutton*:
+The built-in Env is the one taken from *Barto & Sutton* (see image above):
 **Reinforcement Learning: An Introduction** "2017 Completed Draft" Chapter 13
 (Policy Gradient Methods) Fig 13.1.
 

@@ -76,6 +76,10 @@ def main():
     # 1 disc. return, 1 action (0=left, 1=right),
     len_buffer_record = 2
 
+    #config = tf.ConfigProto(log_device_placement=True)
+    ##config.gpu_options.allow_growth = True  # need to set this in order to be able to run locally with GPU
+    #config.gpu_options.per_process_gpu_memory_fraction = 0.4
+
     # the global main policy: pi (live on the learner(s))
     # - explorers sync their own policies (mu) with this at the beginning of an episode
     with tf.device(tf.train.replica_device_setter(ps_tasks=len(learner_hosts),
@@ -163,11 +167,9 @@ def main():
         total_steps = 0
         num_episodes = 0
 
-        # The MonitoredTrainingSession takes care of session initialization,
-        # restoring from a checkpoint, saving to a checkpoint, and closing when done
-        # or an error occurs.
         with tf.train.MonitoredTrainingSession(master=server.target,
                                                is_chief=(args.task_index == 0),
+                                               #config=config,
                                                hooks=[]) as mon_sess:
             while total_steps < args.steps_per_explorer:
                 rs = []  # discounted accum. rewards over one episode
@@ -215,6 +217,7 @@ def main():
     # - every learner iteration, it samples randomly from the main buffer and learns
     else:
         # build the pi-network (similar to mu-network above)
+        #with tf.device("/gpu:0"):
         hidden_out = tf.add(tf.matmul(tf.ones(shape=(args.learn_batch_size, num_inputs)), weights_1_pi), biases_1_pi)
         logits = tf.add(tf.matmul(hidden_out, weights_2_pi), biases_2_pi)
         action_right_prob = tf.nn.softmax(logits[:, :2])[:, 1]  # first two outputs are action logits (1=right)
@@ -242,9 +245,6 @@ def main():
 
         train_op = tf.train.AdagradOptimizer(args.learning_rate).minimize(loss, global_step=global_step)
 
-        # The MonitoredTrainingSession takes care of session initialization,
-        # restoring from a checkpoint, saving to a checkpoint, and closing when done
-        # or an error occurs.
         with tf.train.MonitoredTrainingSession(master=server.target,
                                                is_chief=(args.task_index == 0),
                                                hooks=[]) as mon_sess:
